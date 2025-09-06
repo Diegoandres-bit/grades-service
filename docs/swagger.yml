@@ -90,6 +90,91 @@ paths:
                 type: number
                 example: 100
   
+/api/add-grade:
+    post:
+      summary: Add a new grade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                percentage:
+                  type: number
+                  example: 90
+                assessment_criteria:
+                  type: integer
+                  example: 1
+                action:
+                  type: string
+                  example: created
+      responses:
+        '200':
+          description: Grade added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Grade with percentage 90 and assessment criteria 1 has been created.
+
+/api/edit-grade/{id}:
+  put:
+    summary: Edit an existing grade
+    description: change grade with ID
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la calificación a editar
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Daniel
+              assessment_criteria:
+                type: String
+                example: quiz
+              action:
+                type: number
+                example: 5
+    responses:
+      "200":
+        description: change grade
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: action change successfully
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: Daniel
+                    assessment_criteria:
+                      type: integer
+                      example: 2
+                    action:
+                      type: string
+                      example: updated
+
 
 components:
   schemas:
