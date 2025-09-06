@@ -20,7 +20,7 @@ paths:
 
   /api/grades/{id}:
     get:
-      summary: Obtener una nota por ID
+      summary: get grade for id
       parameters:
         - name: id
           in: path
@@ -29,7 +29,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Nota encontrada
+          description: grade found
           content:
             application/json:
               schema:

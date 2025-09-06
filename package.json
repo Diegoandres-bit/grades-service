@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Diegoandres-bit/grade-service.git"
+    "url": "git+https://github.com/Diegoandres-bit/grades-service.git"
   },
   "keywords": [
     "typescript",
@@ -20,9 +20,9 @@
   "author": "diego",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Diegoandres-bit/grade-service/issues"
+    "url": "https://github.com/Diegoandres-bit/grades-service/issues"
   },
-  "homepage": "https://github.com/Diegoandres-bit/grade-service#readme",
+  "homepage": "https://github.com/Diegoandres-bit/grades-service#readme",
   "dependencies": {
     "express": "^5.1.0",
     "swagger-jsdoc": "^6.2.8",
