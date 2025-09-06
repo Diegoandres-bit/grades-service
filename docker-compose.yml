@@ -1,0 +1,48 @@
+services:
+  backend-grade-service:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    container_name: backend-grade-service
+    depends_on:
+      mongodb-grade-service:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    networks:
+      - backend-grade-service
+  
+  mongodb-grade-service:
+    build:
+      context: ./MongoDB
+      dockerfile: Dockerfile
+    container_name: mongodb-grade-service
+    volumes:
+      - mongodb-grade-service-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - backend-grade-service
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand({ ping: 1 })'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  #`mongo-express-grade-service:
+  #  image: mongo-express
+   # container_name: mongo-express-grade-service
+   # depends_on:
+   #   - mongodb-grade-service
+    #ports:
+   #   - "8081:8081"
+   # networks:
+   #   - backend-grade-service`
+
+networks:
+  backend-grade-service:
+    driver: bridge
+
+volumes:
+  mongodb-grade-service-data:
+    driver: local

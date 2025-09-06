@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Grades Service API
+  version: 1.0.0
+  description: API to manage student grades
+
+paths:
+  /api/grades:
+    get:
+      summary: get all the students grades
+      responses:
+        '200':
+          description: grades list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nota'
+
+  /api/grades/{id}:
+    get:
+      summary: Obtener una nota por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Nota encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+
+
+  /api/subject:
+    get:
+      summary: get the subject of the student
+      responses:
+        '200':
+          description: subject
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nota'
+
+
+                
+
+
+  /api/finalGrade:
+    get:
+      summary: get the final grade
+      responses:
+        '200':
+          description: final grade
+          content:
+            application/json:
+              schema:
+                type: number
+                example: 85.5
+
+/api/criteria:
+    get:
+      summary: get the assessment criteria
+      responses:
+        '200':
+          description: assessment criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nota'
+
+/api/criteria/totalPercentage:
+    get:
+      summary: get the total percentage of the assessment criteria
+      responses:
+        '200':
+          description: total percentage
+          content:
+            application/json:
+              schema:
+                type: number
+                example: 100
+  
+
+components:
+  schemas:
+    Nota:       
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        teacher:
+          type: string
+          example: Diego
+        finalgrade:
+          type: number
+          example: 95
+        subject:
+          type: string
+          example: Math
+        assessment_criteria:
+          type: integer
+          example: 2
+    
+servers:
+  - url: http://localhost:5001/api
+    description: Local
