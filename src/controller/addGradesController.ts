@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { addGrade, searchGrade } from "../repository/GradesRepository";
+import { updateGrade, searchGrade,addActivityToAllStudents } from "../repository/GradesRepository";
 
 export const getGradesBystudentCode = async (req: Request, res: Response) => {
   try {
@@ -27,24 +27,52 @@ export const getGradesBystudentCode = async (req: Request, res: Response) => {
 
 
 
-export const addGrades = async (req: Request, res: Response) => {
+export const updateGrades = async (req: Request, res: Response) => {
   try {
-    const { studentCode, subjectId, courseId, corte, nuevaNota } = req.body;
+    let { studentCode, subjectId, courseId, corte, nombreNota, nuevoValor } = req.body;
+    corte = Number(corte);
+    nuevoValor = Number(nuevoValor);
+    
 
-const updated = await addGrade(studentCode, subjectId, courseId, corte, nuevaNota);
+    if (!studentCode || !subjectId || !courseId || !corte || !nombreNota || isNaN(nuevoValor)) {
+      return res.status(400).json({ message: "Faltan datos requeridos o formato incorrecto" });
+    }
 
+    const updated = await updateGrade(studentCode, subjectId, courseId, corte, nombreNota, nuevoValor);
 
     if (!updated) {
       return res.status(404).json({ message: "Registro de notas no encontrado" });
     }
 
-    return res.json({
-      message: "Nota añadida correctamente",
+    return res.status(200).json({
+      message: "Nota actualizada correctamente",
       data: updated,
     });
 
   } catch (error) {
-    console.error("Error adding grade:", error);
-    return res.status(500).json({ message: "Error al añadir nota", error });
+    console.error("Error actualizando nota:", error);
+    return res.status(500).json({ message: "Error al actualizar nota", error });
+  }
+};
+
+
+
+export const addActivity = async (req: Request, res: Response) => {
+  try {
+    const { courseId, subjectId, corte, nuevaActividad } = req.body;
+
+    if (!courseId || !subjectId || !corte || !nuevaActividad?.name || typeof nuevaActividad?.criteria !== 'number') {
+      return res.status(400).json({ message: 'Faltan datos obligatorios o formato incorrecto' });
+    }
+
+    const result = await addActivityToAllStudents(courseId, subjectId, corte, nuevaActividad);
+
+    return res.status(200).json({
+      message: 'Actividad añadida a todos los estudiantes correctamente',
+      result,
+    });
+  } catch (error) {
+    console.error('Error al añadir actividad:', error);
+    return res.status(500).json({ message: 'Error al añadir actividad', error });
   }
 };

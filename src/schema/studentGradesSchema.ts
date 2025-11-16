@@ -2,7 +2,7 @@ import {Schema,model} from 'mongoose';
 
 const StudentGradesSchema = new Schema(
   {
-    studentcode: { type: String, required: true, index: true },
+    studentCode: { type: String, required: true, index: true },
     courseId: { type: String, required: true, index: true },
     subjectId: { type: String, required: true, index: true },
 
