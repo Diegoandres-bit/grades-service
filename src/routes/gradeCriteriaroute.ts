@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { gradeCriteria } from "../controller/subjectCriteriaController";   
+import { updateCriteriaAllStudents } from "../controller/gradeCriteriaController";
+
 const router = Router();
 
-router.put('/:id', gradeCriteria);
+router.put("/updateCriteria", updateCriteriaAllStudents);
+
 export default router;

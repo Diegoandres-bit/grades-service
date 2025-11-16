@@ -11,37 +11,34 @@ services:
       - "5001:5001"
     networks:
       - backend-grade-service
-  
+      - gateway-network   # 🔹 Se conecta al gateway
+
   mongodb-grade-service:
-    build:
-      context: ./MongoDB
-      dockerfile: Dockerfile
+    image: mongo:6
     container_name: mongodb-grade-service
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 123
+      MONGO_INITDB_DATABASE: grades
     volumes:
       - mongodb-grade-service-data:/data/db
+      - ./MongoDB/init.js:/docker-entrypoint-initdb.d/init.js:ro
     ports:
       - "27017:27017"
     networks:
       - backend-grade-service
+      - gateway-network
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand({ ping: 1 })'"]
+      test: ["CMD-SHELL", "mongosh localhost:27017/admin -u admin -p 123 --eval 'db.runCommand({ ping: 1 })'"]
       interval: 10s
       timeout: 5s
       retries: 5
-  
-  #`mongo-express-grade-service:
-  #  image: mongo-express
-   # container_name: mongo-express-grade-service
-   # depends_on:
-   #   - mongodb-grade-service
-    #ports:
-   #   - "8081:8081"
-   # networks:
-   #   - backend-grade-service`
 
 networks:
   backend-grade-service:
     driver: bridge
+  gateway-network:
+    external: true    
 
 volumes:
   mongodb-grade-service-data:

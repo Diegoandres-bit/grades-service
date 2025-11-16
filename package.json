@@ -24,7 +24,10 @@
   },
   "homepage": "https://github.com/Diegoandres-bit/grades-service#readme",
   "dependencies": {
+    "@types/mongoose": "^5.11.96",
     "express": "^5.1.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.18.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

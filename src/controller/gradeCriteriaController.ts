@@ -1,7 +1,26 @@
-import { Request,Response} from "express";
+import { Request, Response } from "express";
+import { updateCriteria } from "../repository/gradeCriteriaRepository";
 
-export const editGrade = (req: Request, res: Response) => {
-    const id = req.params.id;
-    const {name,assessment_criteria,action} = req.body;
-    res.json({message: `student ${name} grade has change to ${action} of assessment criteria ${assessment_criteria}.`});
-}
+export const updateCriteriaAllStudents = async (req: Request, res: Response) => {
+  try {
+    const { courseId, subjectId, corte, nombreNota, nuevaCriteria } = req.body;
+
+    const result = await updateCriteria(
+      courseId,
+      subjectId,
+      corte,
+      nombreNota,
+      nuevaCriteria
+    );
+
+    return res.json({
+      message: "Criterio actualizado correctamente en todas las notas",
+      result,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error actualizando criteria", error });
+  }
+};
+

@@ -90,7 +90,7 @@ paths:
                 type: number
                 example: 100
   
-/api/add-grade:
+/api/grade:
     post:
       summary: Add a new grade
       requestBody:
