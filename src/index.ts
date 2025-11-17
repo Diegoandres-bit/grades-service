@@ -1,7 +1,6 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import grades from './routes/studentGradeRoutes';
 import notasMateriaEstudianteRoute from './routes/notas-materia-estudiante-route';
 import subjectCriteria from './routes/subjectCriteriaroute';
 import addGrade from './routes/GradesRoute';
@@ -33,7 +32,6 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use('/api/grades', grades);
 app.use('/api', notasMateriaEstudianteRoute);
 app.use('/api/criteria', subjectCriteria);
 app.use('/api/grade', addGrade);

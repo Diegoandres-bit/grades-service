@@ -1,4 +1,4 @@
-import {Schema,model} from 'mongoose';
+import { Schema, model } from "mongoose";
 
 const StudentGradesSchema = new Schema(
   {
@@ -9,9 +9,10 @@ const StudentGradesSchema = new Schema(
     cortes: [
       {
         corte: { type: Number, required: true },
+        criteria: { type: Number, required: true, default: 0 },
         notas: [
           {
-            name: { type: String, required: true ,default: ''},
+            name: { type: String, required: true, default: "" },
             criteria: { type: Number, required: true, default: 0 },
             value: { type: Number, required: true, default: 0 },
           },
@@ -21,6 +22,7 @@ const StudentGradesSchema = new Schema(
     ],
 
     finalGradeCriteria: { type: Number, default: 0 },
+    finalGrade: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
