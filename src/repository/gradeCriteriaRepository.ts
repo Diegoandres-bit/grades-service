@@ -1,20 +1,19 @@
 import { StudentGrades } from "../schema/studentGradesSchema";
+import {
+  calculateFinalGrade,
+  calculateFinalCourseGrade,
+} from "./GradesRepository";
 
-// Reutilizamos funciones de cálculo
-const calculateFinalGrade = (notas: Array<{ value: number; criteria: number }>) => {
-  if (!notas || notas.length === 0) return 0;
-  const totalCriteria = notas.reduce((sum, nota) => sum + nota.criteria, 0);
-  if (totalCriteria > 1) console.warn(`La suma de criterios es ${totalCriteria}, debería ser ≤ 1`);
-  return notas.reduce((sum, nota) => sum + nota.value * nota.criteria, 0);
-};
-
-const calculateFinalCourseGrade = (cortes: Array<{ notaFinalCorte: number; criteria?: number }>) => {
-  if (!cortes || cortes.length === 0) return 0;
-  const totalCriteria = cortes.reduce((sum, c) => sum + (c.criteria ?? 0), 0);
-  if (totalCriteria > 1) console.warn(`La suma de ponderaciones de cortes es ${totalCriteria}, debería ser ≤ 1`);
-  return cortes.reduce((sum, c) => sum + (c.notaFinalCorte ?? 0) * (c.criteria ?? 0), 0);
-};
-
+/**
+ * updateCriteria:
+ * - Actualiza la criteria de una nota (por nombre) en todos los estudiantes filtrados por courseId/subjectId/corte.
+ * - Valida que la suma de criterios de notas dentro del corte no supere 1.
+ * - Valida que la suma de criterios de cortes no supere 1.
+ * - Recalcula notaFinalCorte y finalGrade y persiste el documento actualizado.
+ * - Agrega logs claros cuando una criteria cambie y cuando se recalcule.
+ *
+ * Retorna un objeto con resumen de actualizaciones y errores por estudiante (si aplica).
+ */
 export const updateCriteria = async (
   courseId: string,
   subjectId: string,
@@ -22,30 +21,94 @@ export const updateCriteria = async (
   nombreNota: string,
   nuevaCriteria: number
 ) => {
-  // Actualizar la criteria de la nota
-  const students = await StudentGrades.find({
+  if (typeof nuevaCriteria !== "number" || nuevaCriteria < 0) {
+    throw new Error("nuevaCriteria debe ser número >= 0");
+  }
+
+  const query: any = {
     courseId,
     subjectId,
     "cortes.corte": corte,
-  });
+  };
+
+  const students = await StudentGrades.find(query);
+
+  const results: {
+    updatedCount: number;
+    updatedStudents: string[];
+    errors: Array<{ studentCode: string; message: string }>;
+  } = { updatedCount: 0, updatedStudents: [], errors: [] };
 
   for (const student of students) {
-    const corteObj = student.cortes.find(c => c.corte === corte);
-    if (!corteObj) continue;
+    try {
+      const corteObj: any = student.cortes.find((c: any) => c.corte === corte);
+      if (!corteObj) {
+        results.errors.push({ studentCode: student.studentCode, message: "Corte no encontrado" });
+        console.warn(`[updateCriteria] student=${student.studentCode} corte=${corte} not found`);
+        continue;
+      }
 
-    const notaObj = corteObj.notas.find(n => n.name === nombreNota);
-    if (!notaObj) continue;
+      const notaObj: any = corteObj.notas.find((n: any) => n.name === nombreNota);
+      if (!notaObj) {
+        results.errors.push({ studentCode: student.studentCode, message: "Nota no encontrada en el corte" });
+        console.warn(`[updateCriteria] student=${student.studentCode} nota=${nombreNota} not found`);
+        continue;
+      }
 
-    notaObj.criteria = nuevaCriteria;
+      const oldCriteria = notaObj.criteria ?? 0;
+      if (oldCriteria === nuevaCriteria) {
+        console.log(
+          `[updateCriteria] student=${student.studentCode} nota=${nombreNota} criteria unchanged (${oldCriteria})`
+        );
+      } else {
+        notaObj.criteria = nuevaCriteria;
+        console.log(
+          `[updateCriteria] student=${student.studentCode} nota=${nombreNota} criteria changed from ${oldCriteria} to ${nuevaCriteria}`
+        );
+      }
 
-    // Recalcular nota final del corte
-    corteObj.notaFinalCorte = calculateFinalGrade(corteObj.notas);
+      const sumNotaCriteria = corteObj.notas.reduce((s: number, n: any) => s + (n.criteria ?? 0), 0);
+      if (sumNotaCriteria > 1 + Number.EPSILON) {
+        notaObj.criteria = oldCriteria;
+        const msg = `Suma de criterios en corte ${corte} es ${sumNotaCriteria}, excede 1`;
+        results.errors.push({ studentCode: student.studentCode, message: msg });
+        console.error(`[updateCriteria] ${msg} -- student=${student.studentCode}`);
+        continue;
+      }
 
-    // Recalcular nota final del curso
-    student.finalGrade = calculateFinalCourseGrade(student.cortes);
+      const oldNotaFinal = corteObj.notaFinalCorte ?? 0;
+      corteObj.notaFinalCorte = calculateFinalGrade(corteObj.notas);
+      console.log(
+        `[updateCriteria] student=${student.studentCode} corte=${corte} notaFinalCorte recalculated from ${oldNotaFinal} to ${corteObj.notaFinalCorte}`
+      );
 
-    await student.save();
+      const sumCortesCriteria = student.cortes.reduce((s: number, c: any) => s + (c.criteria ?? 0), 0);
+      if (sumCortesCriteria > 1 + Number.EPSILON) {
+        notaObj.criteria = oldCriteria;
+        corteObj.notaFinalCorte = oldNotaFinal;
+        const msg = `Suma de criterios de cortes es ${sumCortesCriteria}, excede 1`;
+        results.errors.push({ studentCode: student.studentCode, message: msg });
+        console.error(`[updateCriteria] ${msg} -- student=${student.studentCode}`);
+        continue;
+      }
+
+      const oldFinalGrade = student.finalGrade ?? 0;
+      student.finalGrade = calculateFinalCourseGrade(student.cortes);
+      console.log(
+        `[updateCriteria] student=${student.studentCode} finalGrade recalculated from ${oldFinalGrade} to ${student.finalGrade}`
+      );
+
+      student.markModified("cortes");
+      student.markModified("finalGrade");
+      await student.save();
+
+      results.updatedCount += 1;
+      results.updatedStudents.push(student.studentCode);
+    } catch (err: any) {
+      console.error(`[updateCriteria] Error updating student=${(student as any).studentCode}`, err);
+      results.errors.push({ studentCode: (student as any).studentCode || "unknown", message: err.message || String(err) });
+    }
   }
 
-  return { message: "Criterio actualizado y notas recalculadas correctamente" };
+  return results;
 };
