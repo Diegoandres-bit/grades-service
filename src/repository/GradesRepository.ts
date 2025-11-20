@@ -15,12 +15,6 @@ export const searchGrade = (
 
 export const calculateFinalGrade = (notas: Array<{ value: number; criteria: number }>) => {
   if (!notas || notas.length === 0) return 0;
-
-  const totalCriteria = notas.reduce((sum, n) => sum + n.criteria, 0);
-  if (totalCriteria > 1) {
-    console.warn(`La suma de criterios es ${totalCriteria}, debería ser ≤ 1`);
-  }
-
   return notas.reduce((sum, n) => sum + n.value * n.criteria, 0);
 };
 
