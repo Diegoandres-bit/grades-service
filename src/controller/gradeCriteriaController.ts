@@ -1,26 +1,37 @@
 import { Request, Response } from "express";
-import { updateCriteria } from "../repository/gradeCriteriaRepository";
+import { updateCriteriaByName } from "../repository/gradeCriteriaRepository";
 
-export const updateCriteriaAllStudents = async (req: Request, res: Response) => {
+/**
+ * PATCH /api/grades/criteria/by-name
+ * Body: { subjectId, courseId, nombreNota, nuevaCriteria }
+ */
+export const updateCriteriaByNoteName = async (req: Request, res: Response) => {
   try {
-    const { courseId, subjectId, corte, nombreNota, nuevaCriteria } = req.body;
+    const { subjectId, courseId, nombreNota, nuevaCriteria } = req.body;
 
-    const result = await updateCriteria(
-      courseId,
+    // Validación mínima
+    if (!subjectId || !courseId || !nombreNota || typeof nuevaCriteria !== "number") {
+      return res.status(400).json({
+        message: "Faltan datos: subjectId, courseId, nombreNota, nuevaCriteria (number)",
+      });
+    }
+
+    const result = await updateCriteriaByName(
       subjectId,
-      corte,
+      courseId,
       nombreNota,
       nuevaCriteria
     );
 
-    return res.json({
-      message: "Criterio actualizado correctamente en todas las notas",
+    return res.status(200).json({
+      message: "Criteria actualizado correctamente para todas las notas con ese nombre",
       result,
     });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Error actualizando criteria", error });
+  } catch (error: any) {
+    console.error("[updateCriteriaByNoteName] Error:", error);
+    return res.status(500).json({
+      message: "Error interno al actualizar criteria",
+      error: error?.message || error,
+    });
   }
 };
-

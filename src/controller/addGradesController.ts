@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { updateGrade, searchGrade, addActivityToAllStudents } from "../repository/GradesRepository";
+import { updateGrade
+  , searchGrade
+  , addActivityToAllStudents
+  , countPassedSubjects,
+  getGeneralAverage, } from "../repository/GradesRepository";
 
 // Obtener notas por studentCode
 export const getGradesBystudentCode = async (req: Request, res: Response) => {
@@ -62,5 +66,51 @@ export const addActivity = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error al añadir actividad', error });
+  }
+};
+/**
+ * Devuelve cuántas materias ha ganado un estudiante
+ * GET /api/grades/stats/passed/:studentCode
+ */
+export const getPassedSubjects = async (req: Request, res: Response) => {
+  try {
+    const { studentCode } = req.params;
+
+    const result = await countPassedSubjects(studentCode?.toString() || "");
+
+    return res.status(200).json({
+      message: "Materias ganadas obtenidas correctamente",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error obteniendo materias ganadas",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Devuelve el promedio general del estudiante
+ * GET /api/grades/stats/average/:studentCode
+ */
+export const getGeneralAverageController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { studentCode } = req.params;
+
+    const result = await getGeneralAverage(studentCode?.toString() || "");
+
+    return res.status(200).json({
+      message: "Promedio general obtenido correctamente",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error obteniendo el promedio general",
+      error: error.message,
+    });
   }
 };
