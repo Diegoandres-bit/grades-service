@@ -311,7 +311,7 @@ export const createInitialGrade = async (
         criteria: 0,
         notas: [
           {
-            name: "",
+            name: "nota1",
             criteria: 0,
             value: 0,
           },
@@ -324,4 +324,22 @@ export const createInitialGrade = async (
   });
 
   return { created: true, grade: newGrade };
+};
+export const deleteGradeBySubjectCourseStudent = async (
+  studentCode: string,
+  courseId: string,
+  subjectId: string
+) => {
+  try {
+    const result = await StudentGrades.findOneAndDelete({
+      studentCode,
+      courseId,
+      subjectId,
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error deleting grade:", error);
+    throw error;
+  }
 };

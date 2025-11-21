@@ -1,177 +1,249 @@
 openapi: 3.0.0
 info:
   title: Grades Service API
-  version: 1.0.0
-  description: API to manage student grades
-
-paths:
-  /api/grades:
-    get:
-      summary: get all the students grades
-      responses:
-        '200':
-          description: grades list
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Nota'
-
-  /api/grades/{id}:
-    get:
-      summary: get grade for id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: grade found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Nota'
-
-  /api/subject:
-    get:
-      summary: get the subject of the student
-      responses:
-        '200':
-          description: subject
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Nota'
-
-  /api/finalGrade:
-    get:
-      summary: get the final grade
-      responses:
-        '200':
-          description: final grade
-          content:
-            application/json:
-              schema:
-                type: number
-                example: 85.5
-
-  /api/criteria:
-    get:
-      summary: get the assessment criteria
-      responses:
-        '200':
-          description: assessment criteria
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Nota'
-
-  /api/criteria/totalPercentage:
-    get:
-      summary: get the total percentage of the assessment criteria
-      responses:
-        '200':
-          description: total percentage
-          content:
-            application/json:
-              schema:
-                type: number
-                example: 100
-
-  /api/grade:
-    post:
-      summary: Add a new grade
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                percentage:
-                  type: number
-                assessment_criteria:
-                  type: integer
-                action:
-                  type: string
-      responses:
-        '200':
-          description: Grade added successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-
-  /api/edit-grade/{id}:
-    put:
-      summary: Edit an existing grade
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                assessment_criteria:
-                  type: string
-                action:
-                  type: number
-      responses:
-        "200":
-          description: change grade
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                      name:
-                        type: string
-                      assessment_criteria:
-                        type: integer
-                      action:
-                        type: string
-
-components:
-  schemas:
-    Nota:       
-      type: object
-      properties:
-        id:
-          type: integer
-        teacher:
-          type: string
-        finalgrade:
-          type: number
-        subject:
-          type: string
-        assessment_criteria:
-          type: integer
+  version: 1.1.0
+  description: API to manage student grades with cortes and notas
 
 servers:
   - url: http://localhost:5001/api
-    description: Local
+    description: Local server
+
+paths:
+
+  /api/grade/update:
+    put:
+      summary: Update a specific grade inside cortes/notas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGradeDTO'
+      responses:
+        '200':
+          description: Grade updated successfully
+
+  /api/grade/student/{studentCode}:
+    get:
+      summary: Get all grades of a student
+      parameters:
+        - in: path
+          name: studentCode
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of grades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentGrades'
+
+  /api/grade/course/{courseId}/{subjectId}:
+    get:
+      summary: Get all grades for a given course and subject
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Grades found
+
+  /api/grade/create:
+    post:
+      summary: Create an initial grade structure (corte 1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGradeDTO'
+      responses:
+        '201':
+          description: Grade created successfully
+        '200':
+          description: Grade already existed
+
+/api/grade/delete-grade:
+  delete:
+    summary: Delete grades
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeleteGradeDTO'
+    responses:
+      '200':
+        description: Grade deleted successfully
+
+  /api/grade/activity:
+    post:
+      summary: Add an activity to all students in a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddActivityDTO'
+      responses:
+        '200':
+          description: Activity added
+
+  /api/grade/passed/{studentCode}:
+    get:
+      summary: Get passed subjects for a student
+      parameters:
+        - name: studentCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Passed subjects returned
+
+  /api/grade/average/{studentCode}:
+    get:
+      summary: Get general average for a student
+      parameters:
+        - name: studentCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Average grade returned
+
+  /api/grade/criteria/by-name:
+    patch:
+      summary: Update criteria of a note by name across cortes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCriteriaDTO'
+      responses:
+        '200':
+          description: Criteria updated
+
+components:
+
+  schemas:
+
+    StudentGrades:
+      type: object
+      properties:
+        studentCode:
+          type: string
+        courseId:
+          type: string
+        subjectId:
+          type: string
+        cortes:
+          type: array
+          items:
+            type: object
+            properties:
+              corte:
+                type: number
+              criteria:
+                type: number
+              notas:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nota'
+              notaFinalCorte:
+                type: number
+        finalGradeCriteria:
+          type: number
+        finalGrade:
+          type: number
+
+    Nota:
+      type: object
+      properties:
+        name:
+          type: string
+        criteria:
+          type: number
+        value:
+          type: number
+
+    CreateGradeDTO:
+      type: object
+      required: [studentCode, courseId, subjectId]
+      properties:
+        studentCode:
+          type: string
+        courseId:
+          type: string
+        subjectId:
+          type: string
+
+    DeleteGradeDTO:
+      type: object
+      required: [studentCode, courseId, subjectId]
+      properties:
+        studentCode:
+          type: string
+        courseId:
+          type: string
+        subjectId:
+          type: string
+
+    UpdateCriteriaDTO:
+      type: object
+      required: [subjectId, courseId, nombreNota, nuevaCriteria]
+      properties:
+        subjectId:
+          type: string
+        courseId:
+          type: string
+        nombreNota:
+          type: string
+        nuevaCriteria:
+          type: number
+
+    AddActivityDTO:
+      type: object
+      required: [courseId, subjectId, name, criteria]
+      properties:
+        courseId:
+          type: string
+        subjectId:
+          type: string
+        name:
+          type: string
+        criteria:
+          type: number
+
+    UpdateGradeDTO:
+      type: object
+      required: [studentCode, courseId, subjectId, corte, name, value]
+      properties:
+        studentCode:
+          type: string
+        courseId:
+          type: string
+        subjectId:
+          type: string
+        corte:
+          type: number
+        name:
+          type: string
+        value:
+          type: number

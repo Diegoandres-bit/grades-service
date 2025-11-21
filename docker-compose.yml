@@ -11,7 +11,7 @@ services:
       - "5001:5001"
     networks:
       - backend-grade-service
-      - gateway-network   # 🔹 Se conecta al gateway
+      - gateway-network
 
   mongodb-grade-service:
     image: mongo:6

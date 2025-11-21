@@ -4,7 +4,9 @@ import { updateGrade
   , addActivityToAllStudents
   , countPassedSubjects,
   getGeneralAverage,
-createInitialGrade } from "../repository/GradesRepository";
+createInitialGrade,
+deleteGradeBySubjectCourseStudent
+ } from "../repository/GradesRepository";
 
 
 
@@ -144,5 +146,24 @@ export const getGeneralAverageController = async (
       message: "Error obteniendo el promedio general",
       error: error.message,
     });
+  }
+};
+export const deleteGradesController = async (req:Request, res:Response) => {
+  const { studentCode, courseId, subjectId } = req.body;
+
+  try {
+    const deleted = await deleteGradeBySubjectCourseStudent(
+      studentCode,
+      courseId,
+      subjectId
+    );
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Registro no encontrado" });
+    }
+
+    res.json({ message: "Eliminado correctamente", deleted });
+  } catch (error) {
+    res.status(500).json({ message: "Error eliminando", error });
   }
 };

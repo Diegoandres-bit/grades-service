@@ -8,6 +8,7 @@ import {
   getPassedSubjects,
   getGeneralAverageController,
   createGradeByIds ,
+  deleteGradesController ,
 } from "../controller/addGradesController";
 
 const router = Router();
@@ -45,5 +46,7 @@ router.get("/average/:studentCode", getGeneralAverageController);
  * POST /api/grades/create
  */
 router.post("/create", createGradeByIds);
+
+router.delete("/delete-grade", deleteGradesController);
 
 export default router;
