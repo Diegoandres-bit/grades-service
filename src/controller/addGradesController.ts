@@ -3,7 +3,38 @@ import { updateGrade
   , searchGrade
   , addActivityToAllStudents
   , countPassedSubjects,
-  getGeneralAverage, } from "../repository/GradesRepository";
+  getGeneralAverage,
+createInitialGrade } from "../repository/GradesRepository";
+
+
+
+export const createGradeByIds = async (req: Request, res: Response) => {
+  try {
+    const { studentCode, courseId, subjectId } = req.body;
+
+    if (!studentCode || !courseId || !subjectId) {
+      return res.status(400).json({
+        message: "studentCode, courseId y subjectId son obligatorios",
+      });
+    }
+
+    const result = await createInitialGrade(studentCode, courseId, subjectId);
+
+    return res.status(result.created ? 201 : 200).json({
+      message: result.created
+        ? "Grade created successfully"
+        : "Grade already existed",
+      data: result.grade,
+    });
+  } catch (error) {
+    console.error("Error creating grade:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
 
 // Obtener notas por studentCode
 export const getGradesBystudentCode = async (req: Request, res: Response) => {

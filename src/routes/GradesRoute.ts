@@ -7,6 +7,7 @@ import {
   getGradesByCourseId,
   getPassedSubjects,
   getGeneralAverageController,
+  createGradeByIds ,
 } from "../controller/addGradesController";
 
 const router = Router();
@@ -39,5 +40,10 @@ router.post("/activity", addActivity);
 router.get("/passed/:studentCode", getPassedSubjects);
 router.get("/average/:studentCode", getGeneralAverageController);
 
+/**
+ * Crea una nota inicial por IDs
+ * POST /api/grades/create
+ */
+router.post("/create", createGradeByIds);
 
 export default router;

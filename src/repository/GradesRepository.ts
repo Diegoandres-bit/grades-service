@@ -281,3 +281,47 @@ export const getGeneralAverage = async (studentCode: string) => {
     totalSubjects: materias.length,
   };
 };
+/****************************************************
+ * CREAR NOTA INICIAL PARA UN ESTUDIANTE EN UNA MATERIA
+ ****************************************************/
+export const createInitialGrade = async (
+  studentCode: string,
+  courseId: string,
+  subjectId: string
+) => {
+  // Verificar si ya existe
+  const existing = await StudentGrades.findOne({
+    studentCode,
+    courseId,
+    subjectId,
+  });
+
+  if (existing) {
+    return { created: false, grade: existing };
+  }
+
+  // Crear nuevo con corte 1
+  const newGrade = await StudentGrades.create({
+    studentCode,
+    courseId,
+    subjectId,
+    cortes: [
+      {
+        corte: 1,
+        criteria: 0,
+        notas: [
+          {
+            name: "",
+            criteria: 0,
+            value: 0,
+          },
+        ],
+        notaFinalCorte: 0,
+      },
+    ],
+    finalGradeCriteria: 0,
+    finalGrade: 0,
+  });
+
+  return { created: true, grade: newGrade };
+};
