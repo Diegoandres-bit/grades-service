@@ -8,8 +8,12 @@ import editGrade from './routes/gradeCriteriaroute';
 import path from 'path';
 
 import mongoose from "mongoose";
+import cors from "cors";
+
+
 
 const app = express();
+app.use(cors());
 const PORT = 5001;
 
 app.use(express.json());

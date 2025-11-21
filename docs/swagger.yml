@@ -35,7 +35,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Nota'
 
-
   /api/subject:
     get:
       summary: get the subject of the student
@@ -49,10 +48,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Nota'
 
-
-                
-
-
   /api/finalGrade:
     get:
       summary: get the final grade
@@ -65,7 +60,7 @@ paths:
                 type: number
                 example: 85.5
 
-/api/criteria:
+  /api/criteria:
     get:
       summary: get the assessment criteria
       responses:
@@ -78,7 +73,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Nota'
 
-/api/criteria/totalPercentage:
+  /api/criteria/totalPercentage:
     get:
       summary: get the total percentage of the assessment criteria
       responses:
@@ -89,8 +84,8 @@ paths:
               schema:
                 type: number
                 example: 100
-  
-/api/grade:
+
+  /api/grade:
     post:
       summary: Add a new grade
       requestBody:
@@ -102,13 +97,10 @@ paths:
               properties:
                 percentage:
                   type: number
-                  example: 90
                 assessment_criteria:
                   type: integer
-                  example: 1
                 action:
                   type: string
-                  example: created
       responses:
         '200':
           description: Grade added successfully
@@ -119,62 +111,50 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Grade with percentage 90 and assessment criteria 1 has been created.
 
-/api/edit-grade/{id}:
-  put:
-    summary: Edit an existing grade
-    description: change grade with ID
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-        description: ID de la calificación a editar
-    requestBody:
-      required: true
-      content:
-        application/json:
+  /api/edit-grade/{id}:
+    put:
+      summary: Edit an existing grade
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-                example: Daniel
-              assessment_criteria:
-                type: String
-                example: quiz
-              action:
-                type: number
-                example: 5
-    responses:
-      "200":
-        description: change grade
+            type: integer
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                message:
+                name:
                   type: string
-                  example: action change successfully
-                data:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      example: 1
-                    name:
-                      type: string
-                      example: Daniel
-                    assessment_criteria:
-                      type: integer
-                      example: 2
-                    action:
-                      type: string
-                      example: updated
-
+                assessment_criteria:
+                  type: string
+                action:
+                  type: number
+      responses:
+        "200":
+          description: change grade
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      assessment_criteria:
+                        type: integer
+                      action:
+                        type: string
 
 components:
   schemas:
@@ -183,20 +163,15 @@ components:
       properties:
         id:
           type: integer
-          example: 1
         teacher:
           type: string
-          example: Diego
         finalgrade:
           type: number
-          example: 95
         subject:
           type: string
-          example: Math
         assessment_criteria:
           type: integer
-          example: 2
-    
+
 servers:
   - url: http://localhost:5001/api
     description: Local

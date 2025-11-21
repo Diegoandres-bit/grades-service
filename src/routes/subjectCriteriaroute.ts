@@ -4,7 +4,7 @@ import {gradeCriteria,totalPercentage} from '../controller/subjectCriteriaContro
 
 const router=Router();
 
-router.get('/',gradeCriteria);
+router.get('/criteriagrade',gradeCriteria);
 
 router.get('/totalPercentage',totalPercentage);
 
