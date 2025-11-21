@@ -27,7 +27,7 @@ router.get("/student/:studentCode", getGradesBystudentCode);
  * Obtiene todas las notas de un curso
  * GET /api/grades/course/:courseId
  */
-router.get("/course/:courseId", getGradesByCourseId);
+router.get("/course/:courseId/:subjectId", getGradesByCourseId);
 
 /**
  * Añade una actividad a todos los estudiantes del curso

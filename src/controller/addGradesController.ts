@@ -24,10 +24,11 @@ export const getGradesBystudentCode = async (req: Request, res: Response) => {
 // Obtener notas por courseId
 export const getGradesByCourseId = async (req: Request, res: Response) => {
   try {
-    const { courseId } = req.params;
-    if (!courseId) return res.status(400).json({ message: "courseId es requerido" });
+    const { courseId,subjectId } = req.params;
+    if (!courseId ) return res.status(400).json({ message: "courseId es requerido" });
+    if(!subjectId ) return res.status(400).json({ message: "subjectId es requerido" });
 
-    const grades = await searchGrade(undefined, undefined, courseId);
+    const grades = await searchGrade(undefined, subjectId, courseId);
     return res.status(200).json({ message: "Grades retrieved successfully", data: grades });
   } catch (error) {
     console.error(error);
