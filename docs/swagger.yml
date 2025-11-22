@@ -127,7 +127,7 @@ paths:
         '200':
           description: Average grade returned
 
-  /api/grade/criteria/by-name:
+  /api/grades/criteria/by-name:
     patch:
       summary: Update criteria of a note by name across cortes
       requestBody:
