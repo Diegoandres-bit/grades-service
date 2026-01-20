@@ -24,105 +24,91 @@ export const updateCriteriaByName = async (
     throw new Error("nuevaCriteria debe ser número >= 0");
   }
 
-  const query = {
+  const students = await StudentGrades.find({
     subjectId,
-    courseId,
+    courseId
+  });
+
+  const results = {
+    updatedCount: 0,
+    updatedStudents: [] as string[],
+    errors: [] as Array<{ studentCode: string; message: string }>,
   };
-
-  const students = await StudentGrades.find(query).exec();
-
-  const results: {
-    updatedCount: number;
-    updatedStudents: string[];
-    errors: Array<{ studentCode: string; message: string }>;
-  } = { updatedCount: 0, updatedStudents: [], errors: [] };
 
   for (const student of students) {
     try {
-      let changedForStudent = false;
+      let changed = false;
 
-      // ⚠️ REGLA NUEVA: asegurar que cada estudiante tenga cortes del 1 al 3
+      // Asegurar cortes 1 a 3
       const maxCortes = 3;
       for (let c = 1; c <= maxCortes; c++) {
-        let existing = student.cortes.find((x: any) => x.corte === c);
-        if (!existing) {
-          console.log(
-            `[updateCriteriaByName] Student ${student.studentCode} | Creando corte ${c}`
-          );
-
+        if (!student.cortes.find((x: any) => x.corte === c)) {
           student.cortes.push({
             corte: c,
             criteria: 0,
             notas: [],
             notaFinalCorte: 0,
           });
-          changedForStudent = true;
+          changed = true;
         }
       }
 
-      // volver a ordenar cortes (1,2,3)
       student.cortes.sort((a: any, b: any) => a.corte - b.corte);
 
-      // -------------------------------------------------------------------------------------
-      // LÓGICA EXISTENTE: aplicar nuevo criteria a las notas con nombre "nombreNota"
-      // -------------------------------------------------------------------------------------
+      // --- APLICAR CAMBIO DE CRITERIA ---
       for (const corteObj of student.cortes) {
-        const matchingNotas = (corteObj.notas || []).filter(
+        const notasTarget = corteObj.notas.filter(
           (n: any) => n.name === nombreNota
         );
 
-        // si la nota no existe en este corte → continuar
-        if (!matchingNotas.length) continue;
+        if (!notasTarget.length) continue;
 
-        // aplicar nuevo criteria
-        for (const notaObj of matchingNotas) {
-          const oldCriteria = notaObj.criteria ?? 0;
+        // Cambiar criteria
+        for (const nota of notasTarget) {
+          const oldCriteria = nota.criteria ?? 0;
           if (oldCriteria !== nuevaCriteria) {
-            notaObj.criteria = nuevaCriteria;
-            changedForStudent = true;
+            nota.criteria = nuevaCriteria;
+            changed = true;
           }
         }
 
-        // validar suma criteria en notas
-        const sumNotaCriteria = corteObj.notas.reduce(
-          (sum: number, n: any) => sum + (n.criteria ?? 0),
+        // --- RECALCULAR CRITERIA TOTAL DEL CORTE ---
+        corteObj.criteria = corteObj.notas.reduce(
+          (s: number, n: any) => s + (n.criteria ?? 0),
           0
         );
 
-        if (sumNotaCriteria > 1 + Number.EPSILON) {
+        // Validación
+        if (corteObj.criteria > 1 + Number.EPSILON) {
           results.errors.push({
             studentCode: student.studentCode,
-            message: `La suma de criteria en corte ${corteObj.corte} (${sumNotaCriteria.toFixed(
-              3
-            )}) excede el máximo de 1`,
+            message: `La suma de criterios del corte ${corteObj.corte} (${corteObj.criteria}) excede 1`,
           });
-          changedForStudent = false;
+          changed = false;
           break;
         }
 
-        // recalcular nota final del corte
+        // --- RECALCULAR NOTA FINAL DEL CORTE ---
         corteObj.notaFinalCorte = calculateFinalGrade(corteObj.notas);
       }
 
-      if (!changedForStudent) continue;
+      if (!changed) continue;
 
-      // Validar suma de criteria de cortes
-      const sumCortesCriteria = student.cortes.reduce(
-        (sum: number, c: any) => sum + (c.criteria ?? 0),
+      // --- RECALCULAR CRITERIA TOTAL DEL CURSO ---
+      const criteriaCurso = student.cortes.reduce(
+        (s: number, c: any) => s + (c.criteria ?? 0),
         0
       );
 
-      if (sumCortesCriteria > 1 + Number.EPSILON) {
+      if (criteriaCurso > 1 + Number.EPSILON) {
         results.errors.push({
           studentCode: student.studentCode,
-          message: `La suma de criteria de cortes (${sumCortesCriteria.toFixed(
-            3
-          )}) excede el máximo de 1`,
+          message: `La suma total de criterios del curso = ${criteriaCurso}, excede 1`,
         });
         continue;
       }
 
-      // recalcular nota final del curso
+      // --- RECALCULAR NOTA FINAL DEL CURSO ---
       student.finalGrade = calculateFinalCourseGrade(student.cortes);
 
       student.markModified("cortes");
@@ -131,10 +117,10 @@ export const updateCriteriaByName = async (
 
       results.updatedCount++;
       results.updatedStudents.push(student.studentCode);
-    } catch (error: any) {
+    } catch (err: any) {
       results.errors.push({
         studentCode: student.studentCode,
-        message: error.message || String(error),
+        message: err.message,
       });
     }
   }

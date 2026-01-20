@@ -15,25 +15,25 @@ const router = Router();
 
 /**
  * Actualiza una nota específica y recalcula cortes/curso
- * PUT /api/grades/update
+ * PUT /api/grade/update
  */
 router.put("/update", updateGrades);
 
 /**
  * Obtiene las notas de un estudiante por studentCode
- * GET /api/grades/student/:studentCode
+ * GET /api/grade/student/:studentCode
  */
 router.get("/student/:studentCode", getGradesBystudentCode);
 
 /**
  * Obtiene todas las notas de un curso
- * GET /api/grades/course/:courseId
+ * GET /api/grade/course/:courseId
  */
 router.get("/course/:courseId/:subjectId", getGradesByCourseId);
 
 /**
  * Añade una actividad a todos los estudiantes del curso
- * POST /api/grades/activity
+ * POST /api/grade/activity
  */
 router.post("/activity", addActivity);
 
@@ -43,7 +43,7 @@ router.get("/average/:studentCode", getGeneralAverageController);
 
 /**
  * Crea una nota inicial por IDs
- * POST /api/grades/create
+ * POST /api/grade/create
  */
 router.post("/create", createGradeByIds);
 
